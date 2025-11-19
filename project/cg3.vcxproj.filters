@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{5e1e428f-1cb4-4931-90af-18611eb8b9c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine">
+      <UniqueIdentifier>{e7158605-b5b8-419f-acef-b5343f3b5a8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\scene">
+      <UniqueIdentifier>{2f54e9ce-76f6-457c-8242-33ad8b17024f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\io">
+      <UniqueIdentifier>{cde39e77-a350-4b84-97fe-275b42ad06cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\base">
+      <UniqueIdentifier>{2a6047f6-d33b-4ae4-b742-5368567a6a3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\audio">
+      <UniqueIdentifier>{5f3a9d90-ae29-4f74-a040-0ba4fa7de07f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\3d">
+      <UniqueIdentifier>{90f9c41c-54e9-4b14-bc3b-4c16de35546a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\2d">
+      <UniqueIdentifier>{5c3c4997-5b0f-48a8-b0e0-18ff5ad2a496}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\application">
+      <UniqueIdentifier>{c51e9e2c-c0d2-4743-9bbc-99e8a97eb0f4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\shaders\Object3d.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="resources\shaders\Object3d.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Object3d.VS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="externals\imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="externals\imgui\LICENSE.txt">
+      <Filter>imgui</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
