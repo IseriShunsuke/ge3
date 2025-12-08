@@ -1,5 +1,7 @@
 name : ReleaseBuild
 
+ [![ReleaseBuild](https://github.com/IseriShunsuke/ge3/actions/workflows/ReleaseBuild.yml/badge.svg)](https://github.com/IseriShunsuke/ge3/actions/workflows/ReleaseBuild.yml)
+
 on:
   push:
       branches:
