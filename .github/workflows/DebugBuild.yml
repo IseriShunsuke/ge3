@@ -1,5 +1,5 @@
 name : DebugBuild
-
+[![DebugBuild](https://github.com/IseriShunsuke/ge3/actions/workflows/DebugBuild.yml/badge.svg)](https://github.com/IseriShunsuke/ge3/actions/workflows/DebugBuild.yml)
 on:
   push:
       branches:
