@@ -7,7 +7,7 @@ on:
       branches:
         - master
 env:
-  SOLUTION_FILE_PATH: project/CG2_kakunin0_4.sln
+  SOLUTION_FILE_PATH: project/ge3.sln
   CONFIGURATION: Debug
 
 jobs:
