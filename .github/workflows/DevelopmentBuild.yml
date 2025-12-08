@@ -1,5 +1,7 @@
 name : DevelopmentBuild
 
+ [![DevelopmentBuild](https://github.com/IseriShunsuke/ge3/actions/workflows/DevelopmentBuild.yml/badge.svg)](https://github.com/IseriShunsuke/ge3/actions/workflows/DevelopmentBuild.yml)
+
 on:
   push:
       branches:
