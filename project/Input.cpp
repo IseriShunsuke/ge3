@@ -38,9 +38,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include <wrl.h>
 
 
-#define DIRECTINPUT_VERSION	0x0800
-#include <dinput.h>
-
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
@@ -54,12 +51,10 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 
 void Input::Initialize(HINSTANCE hinstance,HWND hwnd)
 {
-	Microsoft::WRL::ComPtr<IDirectInput8> directInput = nullptr;
 
 	HRESULT hr = DirectInput8Create(hinstance,DIRECTINPUT_VERSION,IID_IDirectInput8, (void **)&directInput,nullptr);
 	assert(SUCCEEDED(hr));
 
-	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
 	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
 	assert(SUCCEEDED(hr));
 
@@ -74,4 +69,25 @@ void Input::Initialize(HINSTANCE hinstance,HWND hwnd)
 
 void Input::UpDate()
 {
+	memcpy(keyPre, key, sizeof(key));
+	keyboard->Acquire();
+	keyboard->GetDeviceState(sizeof(key), key);
+}
+
+bool Input::PushKey(BYTE keyNumber)
+{
+	if (key[keyNumber])
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Input::TriggerKey(BYTE keyNumber)
+{
+	if (keyPre[keyNumber] == 0x00 && key[keyNumber] != 0x00)
+	{
+		return true;
+	}
+	return false;
 }

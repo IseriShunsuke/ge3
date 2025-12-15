@@ -784,16 +784,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		(void**)&directInput, nullptr);
 	assert(SUCCEEDED(hr));
 
-	IDirectInputDevice8* keyboard = nullptr;
-	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(hr));
+	//IDirectInputDevice8* keyboard = nullptr;
+	//hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	//assert(SUCCEEDED(hr));
 
-	hr = keyboard->SetDataFormat(&c_dfDIKeyboard);
-	assert(SUCCEEDED(hr));
+	//hr = keyboard->SetDataFormat(&c_dfDIKeyboard);
+	//assert(SUCCEEDED(hr));
 
-	hr = keyboard->SetCooperativeLevel(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(hr));
+	//hr = keyboard->SetCooperativeLevel(
+	//	hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	//assert(SUCCEEDED(hr));
 
 
 
@@ -1327,6 +1327,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		else
 		{
+			input->UpDate();
+
+
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
 			/**wvpData = worldMatrix;*/
@@ -1386,12 +1389,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-			keyboard->Acquire();
+		/*	keyboard->Acquire();
 
 			BYTE key[256] = {};
-			keyboard->GetDeviceState(sizeof(key), key);
+			keyboard->GetDeviceState(sizeof(key), key);*/
 
-			if (key[DIK_0])
+			/*if (input->PushKey(DIK_D))
+			{
+				OutputDebugStringA("Hit 0\n");
+			}*/
+
+			if (input->TriggerKey(DIK_D))
 			{
 				OutputDebugStringA("Hit 0\n");
 			}
