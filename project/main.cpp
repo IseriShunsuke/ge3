@@ -42,6 +42,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
+#include "WinApp.h"
+
 
 struct Vector2
 {
@@ -355,21 +357,7 @@ std::string ConvertString(const std::wstring& str)
 	return result;
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
 
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
-		return true;
-	}
-
-	switch (msg)
-	{
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
 
 IDxcBlob* CompileShader(
 	const std::wstring& filePath,
@@ -739,50 +727,15 @@ ModelData LoadFile(const std::string& directorPath, const std::string& filename)
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	CoInitializeEx(0, COINIT_MULTITHREADED);
+	WinApp* winApp = nullptr;
+
+	winApp = new WinApp();
+	winApp->Initialize();
 
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
 
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-
-	assert(SUCCEEDED(hr));
-
-	WNDCLASS wc{};
-
-	wc.lpfnWndProc = WindowProc;
-	wc.lpszClassName = L"CG2WindowClass";
-	wc.hInstance = GetModuleHandle(nullptr);
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
-	RegisterClass(&wc);
-
-	const int32_t kClientWidth = 1280;
-	const int32_t kClientHeight = 720;
-
-	RECT wrc = { 0,0,kClientWidth,kClientHeight };
-
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName,
-		L"CG2",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		wrc.right - wrc.left,
-		wrc.bottom - wrc.top,
-		nullptr,
-		nullptr,
-		wc.hInstance,
-		nullptr);
-
-	ShowWindow(hwnd, SW_SHOW);
-
-	//input
-	IDirectInput8* directInput = nullptr;
-	hr = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(void**)&directInput, nullptr);
-	assert(SUCCEEDED(hr));
+	
 
 	//IDirectInputDevice8* keyboard = nullptr;
 	//hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
@@ -816,7 +769,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	{
 		DXGI_ADAPTER_DESC3 adapteDesc{};
 
-		hr = useAdapter->GetDesc3(&adapteDesc);
+		HRESULT hr = useAdapter->GetDesc3(&adapteDesc);
 		assert(SUCCEEDED(hr));
 
 		if (!(adapteDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE))
@@ -843,7 +796,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	for (size_t i = 0; i < _countof(featureLevels); ++i)
 	{
 		D3D_FEATURE_LEVEL flevel = featureLevels[i];
-		hr = D3D12CreateDevice(useAdapter, flevel, IID_PPV_ARGS(&device));
+		HRESULT hr = D3D12CreateDevice(useAdapter, flevel, IID_PPV_ARGS(&device));
 		if (SUCCEEDED(hr))
 		{
 			Log(std::format("FeatureLevel : {}\n", featureLevelsStrings[i]));
@@ -900,15 +853,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 
-	swapChainDesc.Width = kClientWidth;
-	swapChainDesc.Height = kClientHeight;
+	swapChainDesc.Width = WinApp::kClientWidth;
+	swapChainDesc.Height =WinApp::kClientHeight;
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), winApp->GetHWND(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
 
 	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 	ID3D12DescriptorHeap* srvDescriptorHeapDesc = CreateDescriptorHeap(device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
@@ -1195,8 +1148,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	D3D12_VIEWPORT viewPort{};
 
-	viewPort.Width = kClientWidth;
-	viewPort.Height = kClientHeight;
+	viewPort.Width = WinApp::kClientWidth;
+	viewPort.Height =WinApp::kClientHeight;
 	viewPort.TopLeftX = 0;
 	viewPort.TopLeftY = 0;
 	viewPort.MinDepth = 0.0f;
@@ -1204,9 +1157,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	D3D12_RECT scissorRect{};
 	scissorRect.left = 0;
-	scissorRect.right = kClientWidth;
+	scissorRect.right = WinApp::kClientWidth;
 	scissorRect.top = 0;
-	scissorRect.bottom = kClientHeight;
+	scissorRect.bottom =WinApp::kClientHeight;
 
 	Transform transform{ {1.0f,1.0f,1.0f,},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform cameratransform{ {1.0f,1.0f,1.0f,},{0.0f,0.0f,0.0f},{0.0f,0.0f,-15.0f} };
@@ -1224,7 +1177,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplWin32_Init(winApp->GetHWND());
 	ImGui_ImplDX12_Init(device.Get(),
 		swapChainDesc.BufferCount,
 		rtvDesc.Format,
@@ -1256,7 +1209,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHeapHandleCPU);
 
 
-	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight);
+	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device.Get(), WinApp::kClientWidth,WinApp::kClientHeight);
 
 
 	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -1314,11 +1267,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	Input* input = nullptr;
 	input =  new Input();
-	input->Initialize(wc.hInstance,hwnd);
+	input->Initialize(winApp);
 
 
-	while (msg.message != WM_QUIT)
+	while (true)
 	{
+		if (winApp->ProcessMessage())
+		{
+			break;
+		}
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -1338,7 +1295,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 
-			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
 
 			Matrix4x4 worldVeiwProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
@@ -1348,7 +1305,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
-			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
 			transformationMatirxDataSprite->WVP = worldViewProjectionMatrixSprite;
 			transformationMatirxDataSprite->World = worldMatrix;
@@ -1505,10 +1462,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rtvDescriptorHeap->Release();
 	swapChainResource[0]->Release();
 	swapChainResource[1]->Release();
-	swapChain->Release();
 	commandList->Release();
-	commandAllocator->Release();
-	commandQueue->Release();
 	materialResource->Release();
 	wvpResource->Release();
 	device->Release();
@@ -1536,7 +1490,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #ifdef _DEBUG
 	debugController->Release();
 #endif 
-	CloseWindow(hwnd);
 
 
 	Microsoft::WRL::ComPtr<IDXGIDebug1> debug;
@@ -1547,7 +1500,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
 	}
 
-	CoUninitialize();
+	winApp->Finalize();
 
+
+	delete winApp;
 	return 0;
 }

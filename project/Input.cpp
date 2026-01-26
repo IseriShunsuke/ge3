@@ -49,10 +49,11 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #pragma comment(lib,"dxguid.lib")
 
 
-void Input::Initialize(HINSTANCE hinstance,HWND hwnd)
+void Input::Initialize(WinApp* winApp)
 {
+	this->winApp_ = winApp;
 
-	HRESULT hr = DirectInput8Create(hinstance,DIRECTINPUT_VERSION,IID_IDirectInput8, (void **)&directInput,nullptr);
+	HRESULT hr = DirectInput8Create(winApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
 	assert(SUCCEEDED(hr));
 
 	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
@@ -62,7 +63,7 @@ void Input::Initialize(HINSTANCE hinstance,HWND hwnd)
 	assert(SUCCEEDED(hr));
 
 
-	 hr = keyboard->SetCooperativeLevel(hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	 hr = keyboard->SetCooperativeLevel(winApp->GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
 }
 
