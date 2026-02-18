@@ -18,6 +18,9 @@
 #include"externals/DirectXTex/DirectXTex.h"
 
 
+#pragma comment(lib,"winmm.lib")
+
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
@@ -42,6 +45,9 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
 void WinApp::Initialize()
 {
+
+	timeBeginPeriod(1);
+
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	HRESULT hr = CoInitializeEx(0,COINIT_MULTITHREADED);
