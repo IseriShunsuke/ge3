@@ -8,37 +8,14 @@
 #include <vector>
 #include <dxcapi.h>
 #include <chrono>
+#include "Mymath.h"
 #include"externals/DirectXTex/DirectXTex.h"
-
-struct Vector2
-{
-	float x;
-	float y;
-};
-
-struct Vector3 {
-	float x;
-	float y;
-	float z;
-};
-
-struct Vector4
-{
-	float x;
-	float y;
-	float z;
-	float w;
-};
 
 struct VertexData
 {
-	Vector4 position;
-	Vector2 texcode;
-	Vector3 normal;
-};
-
-struct Matrix4x4 {
-	float m[4][4];
+	Mymath::Vector4 position;
+	Mymath::Vector2 texcode;
+	Mymath::Vector3 normal;
 };
 
 struct MaterialData
@@ -54,20 +31,20 @@ struct ModelData
 
 struct Material
 {
-	Vector4 color;
+	Mymath::Vector4 color;
 	int32_t enableLighting;
 };
 
 struct TransformMatrix
 {
-	Matrix4x4 WVP;
-	Matrix4x4 World;
+	Mymath::Matrix4x4 WVP;
+	Mymath::Matrix4x4 World;
 };
 
 struct DirectionalLight
 {
-	Vector4 color;
-	Vector3 direction;
+	Mymath::Vector4 color;
+	Mymath::Vector3 direction;
 	float intensity;
 };
 
@@ -75,9 +52,9 @@ struct DirectionalLight
 class DirectXCommon
 {
 public:
+	~DirectXCommon();
 
-
-	void Initialize();
+	void Initialize(WinApp* winApp);
 
 	void deviceInitialize();
 
@@ -137,12 +114,11 @@ public:
 
 	void UpLoadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
-	DirectX::ScratchImage LoadTexture(const std::string& filePath);
-
 	D3D12_DEPTH_STENCIL_DESC GetDepthStencilDesc() { return depthStencilDesc; }
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList.Get(); }
 	ID3D12Device* GetDevice() { return device.Get(); }
 	WinApp* GetWinApp() { return winApp_; }
+	static const uint32_t kMaxSRVCount;
 private:
 	void InitializeFixFPS();
 	void UpdataFixFPS();
@@ -158,7 +134,7 @@ private:
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 
 
-	ID3D12Resource* depthStencilResource;
+	Microsoft::WRL::ComPtr <ID3D12Resource> depthStencilResource;
 
 	uint32_t descriptorSizeSRV;
 	uint32_t descriptorSizeRTV;
@@ -177,7 +153,7 @@ private:
 
 	WinApp* winApp_ = nullptr;
 
-	ID3D12Resource* swapChainResource[2];
+	Microsoft::WRL::ComPtr <ID3D12Resource> swapChainResource[2];
 
 	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> commandList;
 
@@ -186,19 +162,19 @@ private:
 
 	D3D12_RESOURCE_BARRIER barrier{};
 
-	ID3D12Fence* fence;
+	Microsoft::WRL::ComPtr < ID3D12Fence> fence;
 
 	uint64_t fenceValue = 0;
 
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
 
-	IDxcUtils* dxcUtils;
-	IDxcCompiler3* dxcCompiler;
+	Microsoft::WRL::ComPtr < IDxcUtils> dxcUtils;
+	Microsoft::WRL::ComPtr < IDxcCompiler3> dxcCompiler;
 	IDxcIncludeHandler* includeHandler;
 
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	ID3D12Resource* transformationMatirxResourceSprite;
-	ID3D12Resource* directionalLightResource;
+	Microsoft::WRL::ComPtr < ID3D12Resource> transformationMatirxResourceSprite;
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 
 	std::chrono::steady_clock::time_point reference_;
 

@@ -8,6 +8,7 @@
 #include <thread>
 
 
+#include"externals/DirectXTex/DirectXTex.h"
 
 
 #pragma comment(lib, "d3d12.lib")
@@ -34,15 +35,15 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 
 using namespace Microsoft::WRL;
 
+using namespace Mymath;
 
 
+const uint32_t DirectXCommon::kMaxSRVCount = 512;
 
-void DirectXCommon::Initialize()
+
+void DirectXCommon::Initialize(WinApp* winApp)
 {
-	winApp_ = new WinApp();
-	winApp_->Initialize();
-	assert(winApp_);
-	this->winApp_ = winApp_;
+	winApp_ = winApp;
 
 	deviceInitialize();
 	CommandInitialize();
@@ -58,7 +59,6 @@ void DirectXCommon::Initialize()
 	ImGuiInitialize();
 	InitializeFixFPS();
 }
-
 
 void DirectXCommon::deviceInitialize()
 {
@@ -235,7 +235,7 @@ void DirectXCommon::DepthBufferGenerate()
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
-	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	device->CreateDepthStencilView(depthStencilResource.Get(), &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 }
 
@@ -246,15 +246,15 @@ void DirectXCommon::DescriptorGenerate()
 	descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeapDesc = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvDescriptorHeapDesc = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 }
 
 void DirectXCommon::RenderTargetViewInitialize()
 {
 	
-	swapChainResource[0] = {};
-	swapChainResource[1] = {};
+	swapChainResource[0];
+	swapChainResource[1];
 	HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResource[0]));
 	assert(SUCCEEDED(hr));
 
@@ -272,11 +272,11 @@ void DirectXCommon::RenderTargetViewInitialize()
 
 	rtvHandles[0] = rtvStartHandle;
 
-	device->CreateRenderTargetView(swapChainResource[0], &rtvDesc, rtvHandles[0]);
+	device->CreateRenderTargetView(swapChainResource[0].Get(), &rtvDesc, rtvHandles[0]);
 
 	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	device->CreateRenderTargetView(swapChainResource[1], &rtvDesc, rtvHandles[1]);
+	device->CreateRenderTargetView(swapChainResource[1].Get(), &rtvDesc, rtvHandles[1]);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVCPUDescriptorHandle(uint32_t index)
@@ -315,7 +315,7 @@ void DirectXCommon::DescriptorStencilView()
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 
-	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	device->CreateDepthStencilView(depthStencilResource.Get(), &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
 void DirectXCommon::FenceInitialize()
@@ -565,22 +565,7 @@ void DirectXCommon::UpLoadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> tex
 	}
 }
 
-DirectX::ScratchImage DirectXCommon::LoadTexture(const std::string& filePath)
-{
-	DirectX::ScratchImage image{};
 
-	std::wstring filePathW = StringUtility::ConvertString(filePath);
-
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
-
-
-	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
-
-	return mipImages;
-}
 
 
 void DirectXCommon::DXCompilerCreate()
@@ -647,7 +632,7 @@ void DirectXCommon::PreDraw()
 
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-	barrier.Transition.pResource = swapChainResource[buckBufferIndex];
+	barrier.Transition.pResource = swapChainResource[buckBufferIndex].Get();
 
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 
@@ -698,7 +683,7 @@ void DirectXCommon::PostDraw()
 	swapChain->Present(1, 0);
 
 	fenceValue++;
-	commandQueue->Signal(fence, fenceValue);
+	commandQueue->Signal(fence.Get(), fenceValue);
 
 	if (fence->GetCompletedValue() < fenceValue)
 	{
@@ -754,4 +739,8 @@ void DirectXCommon::UpdataFixFPS()
 		}
 	}
 	reference_ = std::chrono::steady_clock::now();
+}
+
+DirectXCommon::~DirectXCommon()
+{
 }

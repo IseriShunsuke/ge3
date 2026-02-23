@@ -20,6 +20,10 @@
 
 #pragma comment(lib,"winmm.lib")
 
+#include "DirectXCommon.h"
+#include "SpriteCommon.h"
+#include "Sprite.h"
+
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -50,9 +54,10 @@ void WinApp::Initialize()
 
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	HRESULT hr = CoInitializeEx(0,COINIT_MULTITHREADED);
+	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	assert(SUCCEEDED(hr));
+
 
 	wc.lpfnWndProc = WindowProc;
 	wc.lpszClassName = L"CG2WindowClass";
@@ -64,8 +69,6 @@ void WinApp::Initialize()
 	RECT wrc = { 0,0,kClientWidth,kClientHeight };
 
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-
 	hwnd = CreateWindow(
 		wc.lpszClassName,
 		L"CG2",
@@ -78,6 +81,7 @@ void WinApp::Initialize()
 		nullptr,
 		wc.hInstance,
 		nullptr);
+
 
 	ShowWindow(hwnd, SW_SHOW);
 }
@@ -109,4 +113,9 @@ void WinApp::Finalize()
 {
 	CloseWindow(hwnd);
 	CoUninitialize();
+}
+
+WinApp::~WinApp()
+{
+
 }
