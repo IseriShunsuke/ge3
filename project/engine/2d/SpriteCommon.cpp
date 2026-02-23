@@ -119,17 +119,17 @@ void SpriteCommon::GraphicsPipelineCreate()
 
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
-	IDxcBlob* vertexShaderBlob = dxcommond_->CompileShader(L"resources/shaders/object3d.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = dxcommond_->CompileShader(L"resources/shaders/object3d.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	IDxcBlob* pixelShaderBlob = dxcommond_->CompileShader(L"resources/shaders/object3d.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = dxcommond_->CompileShader(L"resources/shaders/object3d.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	graphicsPipelineStateDesc = {};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature;
+	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
@@ -159,7 +159,11 @@ void SpriteCommon::CommonRenderingSettings()
 {
 	ID3D12GraphicsCommandList* commandList = dxcommond_->GetCommandList();
 
-	commandList->SetGraphicsRootSignature(rootSignature);
-	commandList->SetPipelineState(graphicsPipelineState);
+	commandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->SetPipelineState(graphicsPipelineState.Get());
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+SpriteCommon::~SpriteCommon()
+{
 }

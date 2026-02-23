@@ -1,5 +1,9 @@
 #include "Sprite.h"
+#include "DirectXCommon.h"
 #include "SpriteCommon.h"
+#include "TextureManager.h"
+
+using namespace Mymath;
 
 Matrix4x4 MakeIdentity4x4() {
 	Matrix4x4 identity;
@@ -244,11 +248,13 @@ Vector3 Normalize(const Vector3& v)
 	return { v.x / length,v.y / length,v.z / length };
 }
 
-void Sprite::Initialize(SpriteCommon* spriteCommon)
+void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 {
 	this->spriteCommon = spriteCommon;
 
-	dxcommond_ = spriteCommon->GetDxCommon();
+	DirectXCommon* dxcommond_ = spriteCommon->GetDxCommon();
+
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 
 
 	vertexResource = dxcommond_->CreateBufferResource(sizeof(VertexData) * 4);
@@ -293,24 +299,12 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 	transformationMatirxDataSprite->WVP = MakeIdentity4x4();
 	transformationMatirxDataSprite->World = MakeIdentity4x4();
 
-	textureSrvHeapHandleCPU = dxcommond_->GetSRVCPUDescriptorHandle(1);
-	textureSrvHeapHandleGPU = dxcommond_->GetSRVGPUDescriptorHandle(1);
-
 	ModelData modelData = dxcommond_->LoadFile("resources", "plane.obj");
-	DirectX::ScratchImage mipImages = dxcommond_->LoadTexture(modelData.material.textureFilePath);
-	const DirectX::TexMetadata metadata = mipImages.GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = dxcommond_->CreateTextureResource(metadata);
-	dxcommond_->UpLoadTextureData(textureResource, mipImages);
+	TextureManager::GetInstance()->LoadTexture(textureFilePath);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
+	
 
 	device = dxcommond_->GetDevice();
-
-	device->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHeapHandleCPU);
 
 	directionalLightResource = dxcommond_->CreateBufferResource(sizeof(DirectionalLight));
 
@@ -328,30 +322,58 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = 1.0f;
+
+	AdjustTextureSize();
+
+	commandList = dxcommond_->GetCommandList();
 }
 	
 
 void Sprite::UpData()
 {
+
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	if (isFlipX_)
+	{
+		left = -left;
+		right = -right;
+	}
+	if (isFlipY_)
+	{
+		top = -top;
+		bottom = -bottom;
+	}
+
+
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetadata(textureIndex);
+	float tex_left = textureLeftTop.x / metadata.width;
+	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
+	float tex_top = textureLeftTop.y / metadata.height;
+	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
+
 	transform.translate = { position.x,position.y,0.0f };
 	transform.rotate = { 0.0f,0.0f,rotation };
 	transform.scale = { scale.x,scale.y,1.0f };
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDate));
-	vertexDate[0].position = { 0.0f,1.0f,0.0f,1.0f };
-	vertexDate[0].texcode = { 0.0f,1.0f };
+
+	vertexDate[0].position = { left,bottom,0.0f,1.0f };
+	vertexDate[1].position = { left,top,0.0f,1.0f };
+	vertexDate[2].position = { right,bottom,0.0f,1.0f };
+	vertexDate[3].position = { right,top,0.0f,1.0f };
+
+	vertexDate[0].texcode = { tex_left,tex_bottom };
+	vertexDate[1].texcode = { tex_left,tex_top };
+	vertexDate[2].texcode = { tex_right,tex_bottom };
+	vertexDate[3].texcode = { tex_right,tex_top };
+
 	vertexDate[0].normal = { 0.0f,0.0f,-1.0f };
-
-	vertexDate[1].position = { 0.0f,0.0f,0.0f,1.0f };
-	vertexDate[1].texcode = { 0.0f,0.0f };
 	vertexDate[1].normal = { 0.0f,0.0f,-1.0f };
-
-	vertexDate[2].position = { 1.0f,1.0f,0.0f,1.0f };
-	vertexDate[2].texcode = { 1.0f,1.0f };
 	vertexDate[2].normal = { 0.0f,0.0f,-1.0f };
-
-	vertexDate[3].position = { 1.0f,0.0f,0.0f,1.0f };
-	vertexDate[3].texcode = { 1.0f,0.0f };
 	vertexDate[3].normal = { 0.0f,0.0f,-1.0f };
 
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
@@ -378,14 +400,25 @@ void Sprite::UpData()
 
 void Sprite::Draw()
 {
-	ID3D12GraphicsCommandList* commandList = dxcommond_->GetCommandList();
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 	commandList->IASetIndexBuffer(&indexBufferView);
 
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(1, transformationMatirxResourceSprite->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHeapHandleGPU);
+	commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSRVHandleGPU(textureIndex));
 	commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
+void Sprite::AdjustTextureSize()
+{
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetadata(textureIndex);
+	textureSize.x = static_cast<float>(metadata.width);
+	textureSize.y = static_cast<float>(metadata.height);
+	size = textureSize;
+}
+
+Sprite::~Sprite()
+{
 }

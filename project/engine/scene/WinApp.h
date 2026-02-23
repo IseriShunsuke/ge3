@@ -5,6 +5,7 @@
 class WinApp
 {
 public:
+	~WinApp();
 
 	void Initialize();
 	void UpData();

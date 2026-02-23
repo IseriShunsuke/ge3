@@ -114,3 +114,8 @@ void WinApp::Finalize()
 	CloseWindow(hwnd);
 	CoUninitialize();
 }
+
+WinApp::~WinApp()
+{
+
+}
