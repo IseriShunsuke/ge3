@@ -133,35 +133,35 @@
     <ClInclude Include="externals\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="engine\io\Input.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\base\WinApp.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="engine\base\DirectXCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\io\Input.h">
+      <Filter>ソース ファイル\engine\io</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\Logger.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\2d\StringUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\2d\SpriteCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\base\Sprite.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\2d\TextureManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\Mymath.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="engine\2d\ResourceObject.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\base\Sprite.h">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\2d\SpriteCommon.h">
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\2d\StringUtility.h">
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\2d\TextureManager.h">
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\base\WinApp.h">
+      <Filter>ソース ファイル\engine\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
